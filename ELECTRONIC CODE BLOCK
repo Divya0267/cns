@@ -1,0 +1,30 @@
+8) ELECTRONIC CODE BLOCK – 
+import javax.crypto.*;
+import java.util.*;
+import java.util.Base64;
+public class ECBExample {
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message: ");
+        String msg = sc.nextLine();
+        // Generate AES key
+        KeyGenerator kg = KeyGenerator.getInstance("AES");
+        kg.init(128); // AES-128
+        SecretKey key = kg.generateKey();
+        Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        // Encrypt
+        c.init(Cipher.ENCRYPT_MODE, key);
+        String enc = Base64.getEncoder().encodeToString(c.doFinal(msg.getBytes()));
+        // Decrypt
+        c.init(Cipher.DECRYPT_MODE, key);
+        String dec = new String(c.doFinal(Base64.getDecoder().decode(enc)));
+        System.out.println("Original: " + msg);
+        System.out.println("Encrypted (ECB): " + enc);
+        System.out.println("Decrypted (ECB): " + dec);
+    }
+}
+OUTPUT – 
+Enter message: Hi! I am Divya!
+Original: Hi! I am Divya!
+Encrypted (ECB): BA9Gzm4zD2BE8+0rUcJdHg==
+Decrypted (ECB): Hi! I am Divya!
