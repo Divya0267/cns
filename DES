@@ -1,0 +1,41 @@
+6) DES – 
+import javax.crypto.*;
+import javax.crypto.spec.DESKeySpec;
+import java.util.*;
+import java.util.Base64;
+
+public class DESExample {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message: ");
+        String message = sc.nextLine();
+        System.out.print("Enter 8-character key: ");
+        String keyStr = sc.nextLine();
+        if(keyStr.length()!=8){ System.out.println("Key must be 8 characters!"); return; }
+
+        try {
+            DESKeySpec spec = new DESKeySpec(keyStr.getBytes());
+            SecretKey key = SecretKeyFactory.getInstance("DES").generateSecret(spec);
+            Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+
+            // Encrypt
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            String encrypted = Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes()));
+
+            // Decrypt
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            String decrypted = new String(cipher.doFinal(Base64.getDecoder().decode(encrypted)));
+
+            System.out.println("Original: " + message);
+            System.out.println("Encrypted: " + encrypted);
+            System.out.println("Decrypted: " + decrypted);
+        } catch (Exception e) { e.printStackTrace(); }
+        sc.close();
+    }
+}
+OUTPUT – 
+Enter message: Hello GNITS!
+Enter 8-character key: 12345678
+Original: Hello GNITS!
+Encrypted: ebb8si7iHJXLGaA5MQVZPQ==
+Decrypted: Hello GNITS!
