@@ -1,0 +1,36 @@
+10) RSA – 
+import java.math.BigInteger;
+import java.util.Scanner;
+public class RSAExample {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message (as integer): ");
+        BigInteger M = new BigInteger(sc.nextLine());
+        // Small primes for demo
+        BigInteger p = new BigInteger("3");
+        BigInteger q = new BigInteger("11");
+        BigInteger n = p.multiply(q);
+        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+        // Find e (1 < e < phi, gcd(e,phi)==1)
+        BigInteger e = BigInteger.TWO;
+        while (!e.gcd(phi).equals(BigInteger.ONE)) e = e.add(BigInteger.ONE);
+        // Compute d (modular inverse of e mod phi)
+        BigInteger d = e.modInverse(phi);
+        // Encrypt: C = M^e mod n
+        BigInteger C = M.modPow(e, n);
+        // Decrypt: M = C^d mod n
+        BigInteger decrypted = C.modPow(d, n);
+        System.out.println("Public Key (e,n): (" + e + "," + n + ")");
+        System.out.println("Private Key (d,n): (" + d + "," + n + ")");
+        System.out.println("Original Message: " + M);
+        System.out.println("Encrypted Message: " + C);
+        System.out.println("Decrypted Message: " + decrypted);
+    }
+}
+OUTPUT – 
+Enter message (as integer): 31
+Public Key (e,n): (3,33)
+Private Key (d,n): (7,33)
+Original Message: 31
+Encrypted Message: 25
+Decrypted Message: 31
