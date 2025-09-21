@@ -1,0 +1,36 @@
+9) CIPHER BLOCK CHAINING – 
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Scanner;
+public class CBCExample {
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message: ");
+        String msg = sc.nextLine();
+        // Generate AES-256 key
+        KeyGenerator kg = KeyGenerator.getInstance("AES");
+        kg.init(256);
+        SecretKey key = kg.generateKey();
+        // Generate random IV
+        byte[] ivBytes = new byte[16];
+        new SecureRandom().nextBytes(ivBytes);
+        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+        Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        // Encrypt
+        c.init(Cipher.ENCRYPT_MODE, key, iv);
+        String enc = Base64.getEncoder().encodeToString(c.doFinal(msg.getBytes()));
+        // Decrypt
+        c.init(Cipher.DECRYPT_MODE, key, iv);
+        String dec = new String(c.doFinal(Base64.getDecoder().decode(enc)));
+        System.out.println("Original: " + msg);
+        System.out.println("Encrypted (CBC): " + enc);
+        System.out.println("Decrypted (CBC): " + dec);
+    }
+}
+OUTPUT – 
+Enter message: Hi! I am Divya!
+Original: Hi! I am Divya!
+Encrypted (CBC): xsVokSeTefbzXEF4ojJg0Q==
+Decrypted (CBC): Hi! I am Divya!
