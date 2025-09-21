@@ -1,0 +1,30 @@
+7) AES – 
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.*;
+public class AESExample {
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter message: "); String msg = sc.nextLine();
+        System.out.print("Enter 16-char key: "); String k = sc.nextLine();
+        if(k.length()!=16){ System.out.println("Key must be 16 characters!"); return; }
+        SecretKeySpec key = new SecretKeySpec(k.getBytes(), "AES");
+        Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        // Encrypt
+        c.init(Cipher.ENCRYPT_MODE, key);
+        String enc = Base64.getEncoder().encodeToString(c.doFinal(msg.getBytes()));
+        // Decrypt
+        c.init(Cipher.DECRYPT_MODE, key);
+        String dec = new String(c.doFinal(Base64.getDecoder().decode(enc)));
+        System.out.println("Original: " + msg);
+        System.out.println("Encrypted: " + enc);
+        System.out.println("Decrypted: " + dec);
+        sc.close();
+    }
+}
+OUTPUT – 
+Enter message: Hello AES!
+Enter 16-char key: 1234567890123456
+Original: Hello AES!
+Encrypted: BJcE7p8HlIfehmY39zgznQ==
+Decrypted: Hello AES!
