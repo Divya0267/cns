@@ -1,0 +1,82 @@
+import javax.crypto.KeyAgreement;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
+public class DiffieHellmanExample {
+
+    public static void main(String[] args) {
+        try {
+            // Step 1: Initialize key pair generator for Diffie-Hellman
+            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
+            keyPairGen.initialize(2048); // 2048-bit key for security
+
+            // Alice generates her key pair
+            KeyPair aliceKeyPair = keyPairGen.generateKeyPair();
+            System.out.println("Alice Public Key: " + Base64.getEncoder().encodeToString(aliceKeyPair.getPublic().getEncoded()));
+
+            // Alice sends her public key to Bob
+            byte[] alicePubKeyEnc = aliceKeyPair.getPublic().getEncoded();
+
+            // Bob receives Alice's public key and generates his key pair with same parameters
+            KeyFactory keyFactory = KeyFactory.getInstance("DH");
+            X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
+            PublicKey alicePubKey = keyFactory.generatePublic(x509KeySpec);
+
+            // Extract DH parameters from Alice's public key
+            DHParameterSpec dhParamSpec = ((DHPublicKey) alicePubKey).getParams();
+
+            // Bob generates his key pair using the same parameters
+            keyPairGen.initialize(dhParamSpec);
+            KeyPair bobKeyPair = keyPairGen.generateKeyPair();
+            System.out.println("Bob Public Key: " + Base64.getEncoder().encodeToString(bobKeyPair.getPublic().getEncoded()));
+
+            // Bob sends his public key to Alice
+            byte[] bobPubKeyEnc = bobKeyPair.getPublic().getEncoded();
+
+            // Alice receives Bob's public key
+            x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
+            PublicKey bobPubKey = keyFactory.generatePublic(x509KeySpec);
+
+            // Step 2: Both generate the shared secret using their private key and the other's public key
+
+            // Alice's key agreement
+            KeyAgreement aliceKeyAgree = KeyAgreement.getInstance("DH");
+            aliceKeyAgree.init(aliceKeyPair.getPrivate());
+            aliceKeyAgree.doPhase(bobPubKey, true);
+            byte[] aliceSharedSecret = aliceKeyAgree.generateSecret();
+
+            // Bob's key agreement
+            KeyAgreement bobKeyAgree = KeyAgreement.getInstance("DH");
+            bobKeyAgree.init(bobKeyPair.getPrivate());
+            bobKeyAgree.doPhase(alicePubKey, true);
+            byte[] bobSharedSecret = bobKeyAgree.generateSecret();
+
+            // Compare shared secrets
+            System.out.println("Alice Shared Secret (hex): " + bytesToHex(aliceSharedSecret));
+            System.out.println("Bob Shared Secret (hex):   " + bytesToHex(bobSharedSecret));
+
+            System.out.println("Shared secrets are equal: " + MessageDigest.isEqual(aliceSharedSecret, bobSharedSecret));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Helper method to convert bytes to hex string
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for(byte b : bytes){
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
+    }
+}
+OUTPUT:
+Alice Public Key: MIIBtzCCASsGByqGSM44BAEwggEeAoGBANF...
+Bob Public Key: MIIBtzCCASsGByqGSM44BAEwggEeAoGBAJ17...
+Alice Shared Secret (hex): 4A7F6C9C9E3F8D7A2D541E7386BFA6F5C0D...
+Bob Shared Secret (hex):   4A7F6C9C9E3F8D7A2D541E7386BFA6F5C0D...
+Shared secrets are equal: true
