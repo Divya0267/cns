@@ -1,0 +1,46 @@
+public class IDEA {
+    private static final int R=8,K=52; private final int[] sk=new int[K];
+
+    private int mul(int a,int b){
+        long x=a&0xFFFF,y=b&0xFFFF; if(x==0)x=0x10000; if(y==0)y=0x10000;
+        long r=(x*y)%0x10001; return r==0x10000?0:(int)r;
+    }
+
+    public void gen(byte[] k0){
+        for(int i=0;i<8;i++) sk[i]=((k0[2*i]&0xFF)<<8)|(k0[2*i+1]&0xFF);
+        for(int i=8;i<K;i++) sk[i]=((sk[i-7]<<9)|((i+1)%8==0?sk[i-14]:sk[i-6])>>>7)&0xFFFF;
+    }
+
+    public int[] enc(int[] b){
+        int x1=b[0],x2=b[1],x3=b[2],x4=b[3],p=0;
+        for(int i=0;i<R;i++){
+            int y1=mul(x1,sk[p++]), y2=(x2+sk[p++])&0xFFFF, y3=(x3+sk[p++])&0xFFFF, y4=mul(x4,sk[p++]);
+            int t2=mul(y1^y3,sk[p++]), t4=mul(((y2^y4)+t2)&0xFFFF,sk[p++]), t5=(t2+t4)&0xFFFF;
+            int t=y2^t4; x1=y1^t4; x4=y4^t5; x2=y3^t5; x3=t;
+        }
+        return new int[]{mul(x1,sk[p++]),(x3+sk[p++])&0xFFFF,(x2+sk[p++])&0xFFFF,mul(x4,sk[p])};
+    }
+
+    static int[] w(byte[] b){
+        return new int[]{((b[0]&0xFF)<<8)|(b[1]&0xFF),((b[2]&0xFF)<<8)|(b[3]&0xFF),
+                         ((b[4]&0xFF)<<8)|(b[5]&0xFF),((b[6]&0xFF)<<8)|(b[7]&0xFF)};
+    }
+
+    static byte[] b(int[] w){
+        return new byte[]{(byte)(w[0]>>>8),(byte)w[0],(byte)(w[1]>>>8),(byte)w[1],
+                          (byte)(w[2]>>>8),(byte)w[2],(byte)(w[3]>>>8),(byte)w[3]};
+    }
+
+    public static void main(String[] a){
+        IDEA id=new IDEA();
+        byte[] k={0,1,2,3,4,5,6,7,8,9,0xA,0xB,0xC,0xD,0xE,0xF}, p={0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17};
+        id.gen(k);
+        System.out.print("Plaintext (hex): "); for(byte x:p) System.out.printf("%02X ",x); System.out.println();
+        byte[] e=b(id.enc(w(p)));
+        System.out.print("Encrypted (hex): "); for(byte x:e) System.out.printf("%02X ",x);
+    }
+}
+
+Output - 
+Plaintext (hex): 10 11 12 13 14 15 16 17 
+Encrypted (hex): 24 0B 8F 9D 9A 53 67 6C
