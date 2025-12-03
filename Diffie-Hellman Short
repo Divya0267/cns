@@ -1,0 +1,16 @@
+public class DiffieHellmanSimple {
+    public static void main(String[] args) {
+        int p = 23;   // prime
+        int g = 5;    // primitive root
+        int a = 6;    // Alice private key
+        int b = 15;   // Bob private key
+        int A = (int)Math.pow(g, a) % p; // Alice public
+        int B = (int)Math.pow(g, b) % p; // Bob public
+        int keyA = (int)Math.pow(B, a) % p; // Alice computes
+        int keyB = (int)Math.pow(A, b) % p; // Bob computes
+        System.out.println("Alice Public : " + A);
+        System.out.println("Bob Public   : " + B);
+        System.out.println("Shared Key A : " + keyA);
+        System.out.println("Shared Key B : " + keyB);
+    }
+}
