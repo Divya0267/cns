@@ -1,36 +1,30 @@
-1) CEASER CIPHER – 
-public class Ceaser {
-    public static void main(String[] args) {
-        String text = "Hello World";
-        int key = 3;
-        // Encryption
-        StringBuilder enc = new StringBuilder();
-        key = key % 26; // normalize
+public class CaesarCipher {
+    public static String encrypt(String text, int shift) {
+        StringBuilder result = new StringBuilder();
         for (char ch : text.toCharArray()) {
             if (Character.isLetter(ch)) {
                 char base = Character.isUpperCase(ch) ? 'A' : 'a';
-                enc.append((char) ((ch - base + key + 26) % 26 + base));
+                ch = (char) ((ch - base + shift) % 26 + base);
             }
-            else
-                enc.append(ch);
+            result.append(ch);
         }
-        String cipherText = enc.toString();
-        // Decryption
-        StringBuilder dec = new StringBuilder();
-        for (char ch : cipherText.toCharArray()) {
-            if (Character.isLetter(ch)) {
-                char base = Character.isUpperCase(ch) ? 'A' : 'a';
-                dec.append((char) ((ch - base - key + 26) % 26 + base));
-            } 
-            else
-                dec.append(ch);
-        }
-        System.out.println("PlainText: " + text);
-        System.out.println("CipherText: " + cipherText);
-        System.out.println("DecryptedText: " + dec.toString());
+        return result.toString();
+    }
+    public static String decrypt(String text, int shift) {
+        return encrypt(text, 26 - shift);
+    }
+    public static void main(String[] args) {
+        String text = "HELLO";
+        int shift = 3;
+        String encrypted = encrypt(text, shift);
+        String decrypted = decrypt(encrypted, shift);
+        System.out.println("Original : " + text);
+        System.out.println("Encrypted: " + encrypted);
+        System.out.println("Decrypted: " + decrypted);
     }
 }
-OUTPUT – 
-PlainText: Hello World
-CipherText: Khoor Zruog
-DecryptedText: Hello World
+
+Sample Output:
+Original : HELLO
+Encrypted: KHOOR
+Decrypted: HELLO
