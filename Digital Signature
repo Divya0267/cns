@@ -1,44 +1,23 @@
 import java.security.*;
-import java.util.Scanner;
+import java.util.Base64;
 
-public class DigitalSignatureSimple {
-
+public class dig {
     public static void main(String[] args) throws Exception {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        KeyPair kp = kpg.generateKeyPair();
 
-        // Read input text
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter text to sign: ");
-        String message = sc.nextLine();
+        String msg = "This is a confidential message.";
 
-        // 1. Generate Key Pair (Public & Private Keys)
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(2048);     // key size
-        KeyPair pair = keyGen.generateKeyPair();
+        Signature s = Signature.getInstance("SHA256withRSA");
+        s.initSign(kp.getPrivate());
+        s.update(msg.getBytes());
+        byte[] sig = s.sign();
 
-        PrivateKey privateKey = pair.getPrivate();
-        PublicKey publicKey = pair.getPublic();
+        System.out.println("Signature: " + Base64.getEncoder().encodeToString(sig));
 
-        // 2. Create Signature object (SHA256 with RSA)
-        Signature sign = Signature.getInstance("SHA256withRSA");
-
-        // 3. Sign the message
-        sign.initSign(privateKey);
-        sign.update(message.getBytes());
-        byte[] digitalSignature = sign.sign();
-
-        // Print signature in hex
-        System.out.println("\nDigital Signature (Hex):");
-        for (byte b : digitalSignature) {
-            System.out.printf("%02x", b);
-        }
-
-        // 4. Verify the signature
-        Signature verifySign = Signature.getInstance("SHA256withRSA");
-        verifySign.initVerify(publicKey);
-        verifySign.update(message.getBytes());
-
-        boolean isVerified = verifySign.verify(digitalSignature);
-
-        System.out.println("\n\nSignature Verification: " + isVerified);
+        s.initVerify(kp.getPublic());
+        s.update(msg.getBytes());
+        System.out.println("Verified: " + s.verify(sig));
     }
 }
