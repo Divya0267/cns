@@ -1,36 +1,22 @@
-10) RSA – 
-import java.math.BigInteger;
-import java.util.Scanner;
-public class RSAExample {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter message (as integer): ");
-        BigInteger M = new BigInteger(sc.nextLine());
-        // Small primes for demo
-        BigInteger p = new BigInteger("3");
-        BigInteger q = new BigInteger("11");
-        BigInteger n = p.multiply(q);
-        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-        // Find e (1 < e < phi, gcd(e,phi)==1)
-        BigInteger e = BigInteger.TWO;
-        while (!e.gcd(phi).equals(BigInteger.ONE)) e = e.add(BigInteger.ONE);
-        // Compute d (modular inverse of e mod phi)
-        BigInteger d = e.modInverse(phi);
-        // Encrypt: C = M^e mod n
-        BigInteger C = M.modPow(e, n);
-        // Decrypt: M = C^d mod n
-        BigInteger decrypted = C.modPow(d, n);
-        System.out.println("Public Key (e,n): (" + e + "," + n + ")");
-        System.out.println("Private Key (d,n): (" + d + "," + n + ")");
-        System.out.println("Original Message: " + M);
-        System.out.println("Encrypted Message: " + C);
-        System.out.println("Decrypted Message: " + decrypted);
-    }
+import javax.crypto.*; import java.security.*; import java.util.*;
+public class RSA {
+  public static void main(String[] a) throws Exception {
+    var kp = KeyPairGenerator.getInstance("RSA"); kp.initialize(2048);
+    var p = kp.generateKeyPair();
+    var c = Cipher.getInstance("RSA");
+    String t = "HelloWorld";
+    c.init(Cipher.ENCRYPT_MODE, p.getPublic());
+    var e = c.doFinal(t.getBytes());
+    c.init(Cipher.DECRYPT_MODE, p.getPrivate());
+    var d = c.doFinal(e);
+    System.out.println("Enc: " + Base64.getEncoder().encodeToString(e));
+    System.out.println("Dec: " + new String(d));
+  }
 }
-OUTPUT – 
-Enter message (as integer): 31
-Public Key (e,n): (3,33)
-Private Key (d,n): (7,33)
-Original Message: 31
-Encrypted Message: 25
-Decrypted Message: 31
+
+Input - 
+HelloWorld
+
+Output - 
+Enc: Uv2v5dM2uN3u4ZV8zT+3mQpGZfUq8P4Cw2iO4O2Q2r3l9lC7u2qk8JD5B8vTgTfblJq7zSgq1vXQF9y8yFQGJ8p7mHwH3mBCt9Wz0V9eVjZqZ1pG2s4W4Sm7eDqRnS6YH9uO3P7D3xN5Z0QyT0U7njzF7rZg==
+Dec: HelloWorld
